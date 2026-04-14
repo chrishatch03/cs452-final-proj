@@ -11,11 +11,13 @@ This codebase includes all resources necessary for submitting my final project r
 
 
 Diagrams:
+
 [New user login flow](new-user-login-flow.md)
+
 [System Design Diagram](system-design.md)
 
 Demo:
-<video controls src="screen-recording-compressed.mp4" title="Demo"></video>
+[Demo video](screen-recording-compressed.mp4)
 
 **What did you learn?**
 
