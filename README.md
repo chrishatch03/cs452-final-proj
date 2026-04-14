@@ -19,6 +19,8 @@ Diagrams:
 Demo:
 [Demo video](screen-recording-compressed.mp4)
 
+https://github.com/user-attachments/assets/36dfaca9-f39c-40b7-b504-9493b45a314d
+
 **What did you learn?**
 
     1. This is the first time I've tried to build an app with a graceful UX that relies on slow and heavy backend operations. Kinarrative has to process, geocode, and organize 18,000 pieces of information for every new user, caching that info to quickly retrieve later is tough. And making the user's first experience with signing up for the app seamless is tricky. Deciding on the data pipeline for retrieving the user's ancestry was hard.
