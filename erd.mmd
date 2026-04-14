@@ -1,0 +1,637 @@
+# KiKINARRATIVE — Entity Relationship Diagram
+To be viewed using the Mermaid VSCode extension
+
+```mermaid
+erDiagram
+
+    %% ─────────────────────────────────────────────
+    %% USER & AUTH
+    %% ─────────────────────────────────────────────
+
+    users {
+        UUID id PK
+        string status
+        string primary_auth_provider
+        string familysearch_user_id
+        string familysearch_person_pid
+        string entid UK
+        string display_name
+        string primary_email
+        string onboarding_status
+        datetime last_seen_at
+        datetime created_at
+        datetime updated_at
+    }
+
+    user_role_assignments {
+        UUID id PK
+        UUID user_id FK
+        string role
+        UUID created_by_user_id FK
+        datetime created_at
+    }
+
+    auth_sessions {
+        UUID id PK
+        UUID user_id FK
+        string app_audience
+        int session_version
+        json role_snapshot
+        string account_status_snapshot
+        string familysearch_connection_status_snapshot
+        string auth_strength
+        string created_by_flow
+        string ip_hash
+        string user_agent_hash
+        datetime created_at
+        datetime last_refreshed_at
+        datetime last_activity_at
+        datetime expires_at
+        datetime revoked_at
+        string revoked_reason
+    }
+
+    auth_state_records {
+        UUID id PK
+        string app_audience
+        string return_to_path
+        string csrf_nonce
+        string state_digest UK
+        datetime created_at
+        datetime expires_at
+        datetime consumed_at
+    }
+
+    external_identity_links {
+        UUID id PK
+        UUID user_id FK
+        string provider
+        string external_subject_id
+        string familysearch_user_id
+        string familysearch_person_pid
+        string display_name
+        string email
+        string status
+        datetime linked_at
+        datetime last_verified_at
+        datetime created_at
+        datetime updated_at
+    }
+
+    familysearch_credentials {
+        UUID id PK
+        UUID user_id FK
+        UUID external_identity_link_id FK
+        string credential_mode
+        text access_token_encrypted
+        text refresh_token_encrypted
+        string token_type
+        bool extended_login_granted
+        json scopes
+        string credential_status
+        int refresh_failure_count
+        datetime access_expires_at
+        datetime refresh_expires_at
+        datetime created_at
+        datetime updated_at
+    }
+
+    users ||--o{ user_role_assignments : "has roles"
+    users ||--o{ auth_sessions : "has sessions"
+    users ||--o{ external_identity_links : "has identity links"
+    users ||--o{ familysearch_credentials : "has credentials"
+    external_identity_links ||--o{ familysearch_credentials : "secures"
+
+    %% ─────────────────────────────────────────────
+    %% FAMILYSEARCH DATA
+    %% ─────────────────────────────────────────────
+
+    fs_persons {
+        string pid PK
+        string display_name
+        string gender
+        string lifespan
+        string birth_date
+        string birth_date_formal
+        string birth_place
+        string death_date
+        string death_date_formal
+        string death_place
+        bool living
+        int birth_year
+        int death_year
+        float birth_place_lat
+        float birth_place_lon
+        float death_place_lat
+        float death_place_lon
+        string portrait_url
+        string ark_url
+        bool is_public
+        int source_count
+        int evidence_count
+        int memory_count
+        json raw_display_json
+        datetime detail_fetched_at
+        datetime memories_fetched_at
+        datetime places_resolved_at
+        datetime created_at
+        datetime updated_at
+    }
+
+    fs_person_facts {
+        UUID id PK
+        string person_pid FK
+        string fs_fact_id
+        string fact_type
+        string fact_type_label
+        string date_original
+        string date_formal
+        string date_normalized
+        int sort_year
+        string place_original
+        string place_normalized
+        string place_description_id
+        UUID canonical_place_id FK
+        string value
+        datetime created_at
+    }
+
+    fs_person_names {
+        UUID id PK
+        string person_pid FK
+        string fs_name_id
+        string name_type
+        string full_text
+        string given_name
+        string surname
+        string lang
+        bool is_preferred
+        datetime created_at
+    }
+
+    fs_person_sources {
+        UUID id PK
+        string person_pid FK
+        string fs_source_ref_id
+        string fs_description_id
+        string description_url
+        string title
+        json tags_json
+        datetime created_at
+    }
+
+    fs_person_memories {
+        UUID id PK
+        string person_pid FK
+        string fs_memory_id
+        string media_type
+        string artifact_type
+        string title
+        string description
+        string image_url
+        string thumbnail_url
+        datetime fs_created_at
+        datetime fetched_at
+    }
+
+    fs_parent_child_groups {
+        UUID id PK
+        string fs_relationship_id UK
+        string parent1_pid FK
+        string parent2_pid FK
+        string child_pid FK
+        string parent1_lineage_type
+        string parent2_lineage_type
+        datetime created_at
+    }
+
+    fs_couple_relationships {
+        UUID id PK
+        string fs_relationship_id UK
+        string person1_pid FK
+        string person2_pid FK
+        datetime created_at
+    }
+
+    fs_couple_facts {
+        UUID id PK
+        UUID couple_relationship_id FK
+        string fs_fact_id
+        string fact_type
+        string fact_type_label
+        string date_original
+        string date_formal
+        string date_normalized
+        int sort_year
+        string place_original
+        string place_normalized
+        string place_description_id
+        UUID canonical_place_id FK
+        datetime created_at
+    }
+
+    fs_persons ||--o{ fs_person_facts : "has facts"
+    fs_persons ||--o{ fs_person_names : "has names"
+    fs_persons ||--o{ fs_person_sources : "has sources"
+    fs_persons ||--o{ fs_person_memories : "has memories"
+    fs_persons ||--o{ fs_parent_child_groups : "parent1"
+    fs_persons ||--o{ fs_parent_child_groups : "parent2"
+    fs_persons ||--o{ fs_parent_child_groups : "child"
+    fs_persons ||--o{ fs_couple_relationships : "person1"
+    fs_persons ||--o{ fs_couple_relationships : "person2"
+    fs_couple_relationships ||--o{ fs_couple_facts : "has facts"
+
+    %% ─────────────────────────────────────────────
+    %% PLACES & EVENTS
+    %% ─────────────────────────────────────────────
+
+    canonical_places {
+        UUID id PK
+        string provider
+        string provider_place_description_id
+        string canonical_name
+        string full_name
+        string place_type
+        float latitude
+        float longitude
+        string country_code
+        string admin1
+        string admin2
+        string locality
+        string source_method
+        float confidence
+        json raw_payload
+        datetime created_at
+        datetime updated_at
+    }
+
+    important_event_definitions {
+        UUID id PK
+        string slug UK
+        string title
+        string subtitle
+        string category
+        int start_year
+        int end_year
+        json region_keywords_json
+        json country_codes_json
+        json admin1_keywords_json
+        float bounds_north
+        float bounds_south
+        float bounds_east
+        float bounds_west
+        text summary
+        text why_it_matters_template
+        text default_chat_prompt
+        bool enabled
+        int display_order
+        datetime created_at
+        datetime updated_at
+    }
+
+    canonical_places ||--o{ fs_person_facts : "resolves"
+    canonical_places ||--o{ fs_couple_facts : "resolves"
+
+    %% ─────────────────────────────────────────────
+    %% USER TREE (links users to discovered ancestors)
+    %% ─────────────────────────────────────────────
+
+    user_tree_persons {
+        UUID id PK
+        UUID user_id FK
+        string person_pid FK
+        int generation
+        int ascendancy_number
+        bool is_direct_line
+        string processing_status
+        datetime created_at
+        datetime updated_at
+    }
+
+    users ||--o{ user_tree_persons : "discovered ancestors"
+    fs_persons ||--o{ user_tree_persons : "linked to user"
+
+    %% ─────────────────────────────────────────────
+    %% CHAT & CONVERSATION
+    %% ─────────────────────────────────────────────
+
+    chats {
+        UUID id PK
+        UUID user_id FK
+        string title
+        string latest_artifact_kind
+        bool pinned
+        datetime deleted_at
+        datetime purge_after_at
+        string deleted_reason
+        datetime created_at
+        datetime updated_at
+        datetime last_activity_at
+    }
+
+    chat_messages {
+        UUID id PK
+        UUID chat_id FK
+        string role
+        string artifact_kind
+        string title
+        text body
+        json message_metadata
+        datetime created_at
+    }
+
+    response_bundles {
+        UUID id PK
+        UUID chat_message_id FK UK
+        string routed_type
+        UUID primary_scene_id FK
+        UUID primary_story_id FK
+        UUID primary_epic_id FK
+        string primary_view_kind
+        text text_answer
+        string fallback_level
+        float confidence
+        datetime created_at
+    }
+
+    users ||--o{ chats : "has conversations"
+    chats ||--o{ chat_messages : "contains messages"
+    chat_messages ||--o| response_bundles : "has response bundle"
+
+    %% ─────────────────────────────────────────────
+    %% KINARRATIVE ARTIFACTS
+    %% ─────────────────────────────────────────────
+
+    scene_records {
+        UUID id PK
+        UUID user_id FK
+        UUID chat_id FK
+        UUID source_question_message_id FK
+        string scene_kind
+        string scene_intent
+        string title
+        int payload_version
+        string payload_storage_mode
+        json payload_json
+        string payload_blob_key
+        string summary
+        float confidence
+        datetime created_at
+    }
+
+    story_records {
+        UUID id PK
+        UUID user_id FK
+        UUID chat_id FK
+        UUID source_question_message_id FK
+        string story_kind
+        string title
+        int payload_version
+        string payload_storage_mode
+        json payload_json
+        string payload_blob_key
+        bool manual_start_required
+        string summary
+        datetime created_at
+    }
+
+    epic_records {
+        UUID id PK
+        UUID user_id FK
+        string epic_kind
+        string title
+        int payload_version
+        string payload_storage_mode
+        json payload_json
+        string payload_blob_key
+        bool editable
+        bool erasable
+        bool is_primary_epic
+        string enrichment_status
+        datetime enrichment_started_at
+        datetime enrichment_completed_at
+        json analysis_json
+        json overview_json
+        datetime created_at
+        datetime updated_at
+    }
+
+    users ||--o{ scene_records : "generated scenes"
+    users ||--o{ story_records : "generated stories"
+    users ||--o{ epic_records : "generated epics"
+    chats ||--o{ scene_records : "produced in chat"
+    chats ||--o{ story_records : "produced in chat"
+    response_bundles ||--o| scene_records : "links to scene"
+    response_bundles ||--o| story_records : "links to story"
+    response_bundles ||--o| epic_records : "links to epic"
+
+    %% ─────────────────────────────────────────────
+    %% COLLECTIONS & SAVED ITEMS
+    %% ─────────────────────────────────────────────
+
+    saved_artifacts {
+        UUID id PK
+        UUID user_id FK
+        UUID chat_id FK
+        string save_kind
+        string reference_type
+        string reference_id
+        string artifact_kind
+        string title
+        text body
+        datetime created_at
+        datetime updated_at
+    }
+
+    saved_collections {
+        UUID id PK
+        UUID user_id FK
+        string name
+        bool is_default
+        datetime created_at
+        datetime updated_at
+    }
+
+    collection_entries {
+        UUID id PK
+        UUID collection_id FK
+        UUID source_chat_id FK
+        string title
+        datetime created_at
+    }
+
+    collection_entry_items {
+        UUID id PK
+        UUID collection_entry_id FK
+        string item_type
+        UUID scene_id FK
+        UUID story_id FK
+        UUID epic_id FK
+        int item_order
+    }
+
+    users ||--o{ saved_artifacts : "saved items"
+    users ||--o{ saved_collections : "has collections"
+    saved_collections ||--o{ collection_entries : "contains entries"
+    collection_entries ||--o{ collection_entry_items : "contains items"
+    collection_entry_items ||--o| scene_records : "references"
+    collection_entry_items ||--o| story_records : "references"
+    collection_entry_items ||--o| epic_records : "references"
+
+    %% ─────────────────────────────────────────────
+    %% USER PREFERENCES & PERSONALIZATION
+    %% ─────────────────────────────────────────────
+
+    user_profiles {
+        UUID user_id PK, FK
+        string preferred_name
+        text bio_notes
+        json hobbies_json
+        json major_life_experiences_json
+        json heritage_goals_json
+        json conversation_preferences_json
+        datetime created_at
+        datetime updated_at
+    }
+
+    user_settings {
+        UUID user_id PK, FK
+        string theme
+        string text_size
+        string chat_response_playback_speed
+        bool reduced_motion
+        json accessibility_notes_json
+        string privacy_mode
+        datetime created_at
+        datetime updated_at
+    }
+
+    user_consents {
+        UUID user_id PK, FK
+        bool behavioral_analytics
+        bool content_analytics
+        bool personalization_memory
+        int consent_version
+        datetime created_at
+        datetime updated_at
+    }
+
+    user_consent_history {
+        UUID id PK
+        UUID user_id FK
+        bool behavioral_analytics
+        bool content_analytics
+        bool personalization_memory
+        int consent_version
+        string changed_by
+        datetime created_at
+    }
+
+    user_memory {
+        UUID id PK
+        UUID user_id FK
+        string memory_kind
+        string value
+        float strength
+        text source_reason
+        UUID source_event_id
+        datetime created_at
+        datetime updated_at
+    }
+
+    user_favorite_people {
+        UUID id PK
+        UUID user_id FK
+        string person_pid
+        datetime created_at
+    }
+
+    scene_feedback {
+        UUID id PK
+        UUID user_id FK
+        UUID scene_id FK
+        bool answered_well
+        bool liked_scene
+        text scene_comment
+        bool liked_text_response
+        datetime created_at
+    }
+
+    users ||--o| user_profiles : "has profile"
+    users ||--o| user_settings : "has settings"
+    users ||--o| user_consents : "has consents"
+    users ||--o{ user_consent_history : "consent changes"
+    users ||--o{ user_memory : "learned preferences"
+    users ||--o{ user_favorite_people : "favorited ancestors"
+    users ||--o{ scene_feedback : "gave feedback"
+    scene_records ||--o{ scene_feedback : "received feedback"
+
+    %% ─────────────────────────────────────────────
+    %% VIEW STATE & ANALYTICS
+    %% ─────────────────────────────────────────────
+
+    view_state_snapshots {
+        UUID id PK
+        UUID user_id FK
+        UUID chat_id FK
+        string view_kind
+        int state_version
+        string state_storage_mode
+        json state_json
+        string state_blob_key
+        datetime created_at
+    }
+
+    analytics_events {
+        UUID id PK
+        string event_name
+        string event_bucket
+        string sensitivity_class
+        UUID user_id FK
+        UUID session_id FK
+        UUID chat_id FK
+        string surface
+        string response_type
+        string scene_kind
+        string story_kind
+        string epic_kind
+        json metadata_json
+        datetime created_at
+    }
+
+    admin_audit_logs {
+        UUID id PK
+        UUID admin_user_id FK
+        UUID admin_session_id FK
+        string action_name
+        string target_type
+        UUID target_id
+        text summary
+        json metadata_json
+        datetime created_at
+    }
+
+    users ||--o{ view_state_snapshots : "view states"
+    users ||--o{ analytics_events : "tracked events"
+    users ||--o{ admin_audit_logs : "admin actions"
+    auth_sessions ||--o{ analytics_events : "session events"
+    auth_sessions ||--o{ admin_audit_logs : "session audits"
+    chats ||--o{ analytics_events : "chat events"
+    chats ||--o{ view_state_snapshots : "chat view states"
+```
+
+## Table Summary
+
+| Group | Tables | Description |
+|-------|--------|-------------|
+| **User & Auth** | `users`, `user_role_assignments`, `auth_sessions`, `auth_state_records`, `external_identity_links`, `familysearch_credentials` | User accounts, roles, sessions, OAuth credentials |
+| **FamilySearch Data** | `fs_persons`, `fs_person_facts`, `fs_person_names`, `fs_person_sources`, `fs_person_memories`, `fs_parent_child_groups`, `fs_couple_relationships`, `fs_couple_facts` | Cached ancestry data from FamilySearch API |
+| **Places & Events** | `canonical_places`, `important_event_definitions` | Geocoded places and historical event definitions |
+| **User Tree** | `user_tree_persons` | Links users to their discovered ancestors with generation info |
+| **Chat & Conversation** | `chats`, `chat_messages`, `response_bundles` | Chat history and AI response routing |
+| **KINARRATIVE Artifacts** | `scene_records`, `story_records`, `epic_records` | AI-generated KINARRATIVE content with playback payloads |
+| **Collections** | `saved_artifacts`, `saved_collections`, `collection_entries`, `collection_entry_items` | User-saved and curated KINARRATIVE collections |
+| **User Preferences** | `user_profiles`, `user_settings`, `user_consents`, `user_consent_history`, `user_memory`, `user_favorite_people`, `scene_feedback` | Personalization, settings, consent management, feedback |
+| **View State & Analytics** | `view_state_snapshots`, `analytics_events`, `admin_audit_logs` | UI state caching, product analytics, admin audit trail |
+
+**Total: 37 tables**

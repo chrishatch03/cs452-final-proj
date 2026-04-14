@@ -1,0 +1,11 @@
+| Date | What | Hours |
+|------|------|-------|
+|3/30|initialized git repository, initial planning and getting started on designing a plan for infrastructure. Spent time calling professionals for their perspective on how to design a 'welcome experience' for the user where they don't have to wait hours for their information to come back to them.|8|
+|3/31|began the initial backend tech stack. accomplished starting the fastapi server with good head start on initial endpoints. began a new nextjs frontend app and fleshed out rough design using claude.|8|
+|4/1|Spent substantial time working on the data structures ('animations', 'frames', 'stories', 'epics', 'collections', Request/Response types, etc) for the backend, using mysql db for local development. Will eventually be hosted on aws resources.|8|
+|4/2|Generated the backend tables/services/endpoints, and router on the frontend for authentication. Focused on generating the algorithm for gathering that creates user's accounts and triggers getting their data from family search. was able to get a huge chunk of my ancestry.|6|
+|4/3|Did a whole loop on researching generativeUI and possibly using one of google's models to make the visual experience on the frontend app dynamic and specific to the user's questions. Ultimately decided the better and more consistent approach is to define my own frontend components for displaying the animations so I can have control. Built the first two types of visual aids to demonstrate family history data on, a flat map and an interactive globe.|8|
+|4/8|Working on trying to display the the ancestors, events, and stories on the globe and actually get the positioning right. I switched to using a universally accepted coordinate system.|2|
+|4/9|reorganized backend folder structrue (just cleaning up/renaming/etc). Generated an idea for the admin app I want to track analytics and stats on. Very crude but it gets the idea across.|1.5|
+|4/10|I have a working minimum viable product, close to ready for presenting the idea. I also switched the frontend apps from using next.js to using React + Vite + Tailwind, redesigned the landing page to look epic 🤘|1|
+|Total||42.5|
